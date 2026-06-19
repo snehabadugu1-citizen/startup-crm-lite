@@ -1,46 +1,31 @@
 import React from 'react';
 
-/**
- * @typedef {Object} StatsCardProps
- * @property {string} title - The title of the metric
- * @property {string|number} value - The main metric value to display
- * @property {React.ElementType} icon - Lucide React icon component
- * @property {number} change - Percentage change compared to last period
- * @property {'primary' | 'success' | 'warning' | 'danger'} [color] - The color theme for the icon and trend
- */
-
-/**
- * A responsive card component displaying a key metric, an icon, and a trend indicator.
- * @param {StatsCardProps} props - The component props
- * @returns {JSX.Element} The rendered StatsCard component
- */
 export default function StatsCard({ title, value, icon: Icon, change, color = 'primary' }) {
-  // Map our semantic colors to the specific hex codes requested
   const colorMap = {
-    primary: 'text-[#2563EB] bg-[#2563EB]/10',
-    success: 'text-[#22C55E] bg-[#22C55E]/10',
-    warning: 'text-[#F59E0B] bg-[#F59E0B]/10',
-    danger: 'text-[#EF4444] bg-[#EF4444]/10',
+    primary: 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40',
+    success: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40',
+    warning: 'text-amber-500 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40',
+    danger:  'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40',
   };
 
   const iconClasses = colorMap[color] || colorMap.primary;
   const isPositive = change >= 0;
-  
+
   return (
-    <div className="bg-white rounded-xl shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)] border border-[#E2E8F0] p-6 flex flex-col">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 flex flex-col transition-colors duration-200">
       <div className="flex justify-between items-start mb-4">
-        <h3 className="text-[#64748B] text-sm font-medium">{title}</h3>
+        <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium">{title}</h3>
         <div className={`p-2 rounded-lg ${iconClasses}`}>
           <Icon size={20} />
         </div>
       </div>
       <div className="mt-auto">
-        <div className="text-3xl font-bold text-[#0F172A]">{value}</div>
+        <div className="text-3xl font-bold text-gray-900 dark:text-gray-50">{value}</div>
         <div className="flex items-center mt-2 text-sm">
-          <span className={`font-medium ${isPositive ? 'text-[#22C55E]' : 'text-[#EF4444]'}`}>
+          <span className={`font-medium ${isPositive ? 'text-emerald-500 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400'}`}>
             {isPositive ? '+' : ''}{change}%
           </span>
-          <span className="text-[#64748B] ml-2">vs last month</span>
+          <span className="text-gray-500 dark:text-gray-400 ml-2">vs last month</span>
         </div>
       </div>
     </div>

@@ -1,52 +1,34 @@
 import React from 'react';
 
-/**
- * @typedef {Object} Lead
- * @property {number|string} id - Unique identifier
- * @property {string} name - Lead or contact name
- * @property {string} company - Company name
- * @property {string} status - Lead status
- * @property {string} dateAdded - Date the lead was added
- */
-
-/**
- * @typedef {Object} RecentLeadsProps
- * @property {Lead[]} leads - Array of lead objects
- */
-
-/**
- * Displays a clean table of the 5 most recent leads.
- * @param {RecentLeadsProps} props - The component props
- * @returns {JSX.Element} The rendered RecentLeads component
- */
 export default function RecentLeads({ leads }) {
-  // Get last 5 leads
   const recentLeads = leads.slice(0, 5);
 
   const getStatusBadge = (status) => {
-    switch (status) {
-      case 'New':
-        return <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-[#2563EB]/10 text-[#2563EB]">New</span>;
-      case 'Contacted':
-        return <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-[#F59E0B]/10 text-[#F59E0B]">Contacted</span>;
-      case 'Qualified':
-        return <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-[#22C55E]/10 text-[#22C55E]">Qualified</span>;
-      case 'Lost':
-        return <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-[#EF4444]/10 text-[#EF4444]">Lost</span>;
-      default:
-        return <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">{status}</span>;
-    }
+    const map = {
+      'New':               'bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400',
+      'Contacted':         'bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400',
+      'Meeting Scheduled': 'bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400',
+      'Proposal Sent':     'bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400',
+      'Won':               'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400',
+      'Lost':              'bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400',
+    };
+    const cls = map[status] || 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300';
+    return (
+      <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${cls}`}>
+        {status}
+      </span>
+    );
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)] border border-[#E2E8F0] overflow-hidden">
-      <div className="p-6 border-b border-[#E2E8F0] flex justify-between items-center">
-        <h3 className="text-[#0F172A] font-semibold text-lg">Recent Leads</h3>
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-colors duration-200">
+      <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+        <h3 className="text-gray-900 dark:text-gray-50 font-semibold text-lg">Recent Leads</h3>
       </div>
-      
+
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
-          <thead className="bg-[#F8FAFC] text-[#64748B]">
+          <thead className="bg-gray-50 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400">
             <tr>
               <th className="px-6 py-3 font-medium">Name</th>
               <th className="px-6 py-3 font-medium">Company</th>
@@ -54,18 +36,18 @@ export default function RecentLeads({ leads }) {
               <th className="px-6 py-3 font-medium">Date Added</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#E2E8F0]">
+          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
             {recentLeads.map((lead) => (
-              <tr key={lead.id} className="hover:bg-[#F8FAFC]/50 transition-colors">
-                <td className="px-6 py-4 font-medium text-[#0F172A]">{lead.name}</td>
-                <td className="px-6 py-4 text-[#64748B]">{lead.company}</td>
+              <tr key={lead.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors">
+                <td className="px-6 py-4 font-medium text-gray-900 dark:text-gray-100">{lead.name}</td>
+                <td className="px-6 py-4 text-gray-500 dark:text-gray-400">{lead.company}</td>
                 <td className="px-6 py-4">{getStatusBadge(lead.status)}</td>
-                <td className="px-6 py-4 text-[#64748B]">{lead.dateAdded}</td>
+                <td className="px-6 py-4 text-gray-500 dark:text-gray-400">{lead.dateAdded || '—'}</td>
               </tr>
             ))}
             {recentLeads.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-6 py-8 text-center text-[#64748B]">
+                <td colSpan={4} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
                   No recent leads found.
                 </td>
               </tr>

@@ -4,7 +4,14 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>startup-crm-lite</title>
+    <title>Startup CRM Lite</title>
+    <!-- FOUC prevention: apply dark class synchronously before any render -->
+    <script>
+      try {
+        const isDark = JSON.parse(localStorage.getItem('startup-crm-theme'));
+        if (isDark) document.documentElement.classList.add('dark');
+      } catch (_) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

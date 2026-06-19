@@ -10,171 +10,169 @@ import EmptyState from '../components/common/EmptyState';
 import { useLeads } from '../context/LeadContext';
 
 export default function Leads() {
-  // Consume leads and CRUD operations from global context
   const { leads, addLead, updateLead, deleteLead } = useLeads();
-  
-  // Search & Filter state
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState('All');
-  
-  // UI states
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedLead, setSelectedLead] = useState(null);
-  const [viewMode, setViewMode] = useState('table'); // 'table' or 'grid'
 
-  // --- Derived State: Compute the filtered leads for rendering ---
+  const [searchQuery,  setSearchQuery]  = useState('');
+  const [activeFilter, setActiveFilter] = useState('All');
+  const [isModalOpen,  setIsModalOpen]  = useState(false);
+  const [selectedLead, setSelectedLead] = useState(null);
+  // Default view: 'table' on desktop, but on mobile the table is hidden
+  // and cards are always shown — the toggle only matters on tablet+
+  const [viewMode, setViewMode] = useState('table');
+
   const filteredLeads = leads
-    // 1. Filter by Status Pill
     .filter(lead => activeFilter === 'All' || lead.status === activeFilter)
-    // 2. Filter by Search Query (Name, Company, or Email)
-    .filter(lead => 
-      lead.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      lead.company.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      lead.email.toLowerCase().includes(searchQuery.toLowerCase()) 
+    .filter(lead =>
+      lead.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      lead.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      lead.email.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-  // --- Handlers ---
-  const handleClearFilters = () => {
-    setSearchQuery('');
-    setActiveFilter('All');
-  };
-
-  const handleAddClick = () => {
-    setSelectedLead(null);
-    setIsModalOpen(true);
-  };
-
-  const handleEditClick = (lead) => {
-    setSelectedLead(lead);
-    setIsModalOpen(true);
-  };
-
-  const handleDeleteClick = (id) => {
-    if (window.confirm('Are you sure you want to delete this lead? This action cannot be undone.')) {
-      deleteLead(id); // Using context method
-      toast.error('Lead deleted successfully', { icon: '🗑️' });
+  const handleClearFilters = () => { setSearchQuery(''); setActiveFilter('All'); };
+  const handleAddClick     = () => { setSelectedLead(null); setIsModalOpen(true); };
+  const handleEditClick    = (lead) => { setSelectedLead(lead); setIsModalOpen(true); };
+  const handleDeleteClick  = (id) => {
+    if (window.confirm('Delete this lead? This cannot be undone.')) {
+      deleteLead(id);
+      toast.error('Lead deleted', { icon: '🗑️' });
     }
   };
-
   const handleFormSubmit = (formData) => {
     if (selectedLead) {
-      updateLead(selectedLead.id, formData); // Using context method
-      toast.success('Lead updated successfully');
+      updateLead(selectedLead.id, formData);
+      toast.success('Lead updated');
     } else {
-      addLead(formData); // Using context method
-      toast.success('Lead created successfully');
+      addLead(formData);
+      toast.success('Lead created');
     }
     setIsModalOpen(false);
   };
 
   return (
-    <div className="space-y-6">
-      {/* Page Header and Global Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-50">Lead Management</h1>
-        
-        <div className="flex items-center gap-3">
-          {/* View Toggle (hidden on mobile) */}
-          <div className="hidden md:flex items-center bg-gray-100 dark:bg-gray-800 p-1 rounded-lg border border-gray-200 dark:border-gray-700">
-            <button 
+    <div className="space-y-4 sm:space-y-6">
+
+      {/* ── Page header ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-50">
+          Lead Management
+        </h1>
+
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* View toggle — tablet+ only (md:) */}
+          <div className="hidden md:flex items-center bg-gray-100 dark:bg-gray-700 p-1 rounded-xl border border-gray-200 dark:border-gray-600">
+            <button
               onClick={() => setViewMode('table')}
-              className={`p-1.5 rounded-md transition-colors ${viewMode === 'table' ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'}`}
-              aria-label="Table View"
+              className={`p-2 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center ${
+                viewMode === 'table'
+                  ? 'bg-white dark:bg-gray-600 shadow-sm text-blue-600 dark:text-blue-400'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+              }`}
+              aria-label="Table view"
             >
               <List size={18} />
             </button>
-            <button 
+            <button
               onClick={() => setViewMode('grid')}
-              className={`p-1.5 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'}`}
-              aria-label="Grid View"
+              className={`p-2 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center ${
+                viewMode === 'grid'
+                  ? 'bg-white dark:bg-gray-600 shadow-sm text-blue-600 dark:text-blue-400'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+              }`}
+              aria-label="Grid view"
             >
               <LayoutGrid size={18} />
             </button>
           </div>
 
-          <button 
+          <button
             onClick={handleAddClick}
-            className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors shadow-sm w-full sm:w-auto"
+            className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-medium transition-colors shadow-sm min-h-[44px] text-sm sm:text-base"
           >
             <Plus size={18} />
-            Add Lead
+            <span className="hidden xs:inline">Add Lead</span>
+            <span className="xs:hidden">Add</span>
           </button>
         </div>
       </div>
 
-      {/* Search and Filters Section */}
-      <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
-        <div className="mb-4">
-          <SearchBar value={searchQuery} onChange={setSearchQuery} />
-        </div>
-        <FilterBar 
-          activeFilter={activeFilter} 
-          onFilterChange={setActiveFilter} 
-          leads={leads} 
-        />
+      {/* ── Search & Filter bar ── */}
+      <div className="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm space-y-3">
+        <SearchBar value={searchQuery} onChange={setSearchQuery} />
+        <FilterBar activeFilter={activeFilter} onFilterChange={setActiveFilter} leads={leads} />
       </div>
 
-      {/* Main Content Area */}
-      <div>
-        {filteredLeads.length === 0 ? (
-          <EmptyState 
-            totalLeads={leads.length} 
-            onClearFilters={handleClearFilters} 
-          />
-        ) : (
-          <>
-            {/* Desktop Table View */}
-            {viewMode === 'table' && (
-              <div className="hidden md:block">
-                <LeadTable 
-                  leads={filteredLeads} 
-                  onEdit={handleEditClick} 
-                  onDelete={handleDeleteClick} 
-                />
-              </div>
-            )}
-
-            {/* Mobile Cards / Desktop Grid View */}
-            <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 ${viewMode === 'table' ? 'md:hidden' : ''}`}>
-              {filteredLeads.map((lead) => (
-                <LeadCard 
-                  key={lead.id} 
-                  lead={lead} 
-                  onEdit={handleEditClick} 
-                  onDelete={handleDeleteClick} 
-                />
-              ))}
+      {/* ── Lead list ── */}
+      {filteredLeads.length === 0 ? (
+        <EmptyState totalLeads={leads.length} onClearFilters={handleClearFilters} />
+      ) : (
+        <>
+          {/* 
+              Desktop table: visible on md+ when viewMode === 'table'
+              We always show it on md+ unless user switched to grid mode.
+          */}
+          {viewMode === 'table' && (
+            <div className="hidden md:block">
+              <LeadTable leads={filteredLeads} onEdit={handleEditClick} onDelete={handleDeleteClick} />
             </div>
-          </>
-        )}
-      </div>
+          )}
 
-      {/* Add/Edit Lead Modal Overlay */}
+          {/*
+              Card grid:
+              - Mobile (< md): ALWAYS shown — this is the only view
+              - Tablet+ grid mode: shown
+              - Tablet+ table mode: hidden (handled by md:block above)
+          */}
+          <div className={`grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 ${
+            viewMode === 'table' ? 'md:hidden' : ''
+          }`}>
+            {filteredLeads.map((lead) => (
+              <LeadCard key={lead.id} lead={lead} onEdit={handleEditClick} onDelete={handleDeleteClick} />
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* ── Add/Edit Modal ──
+          Mobile:  full-screen, no rounding
+          Tablet+: centered modal with max-w-lg, rounded, backdrop
+      */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm overflow-y-auto">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl my-8 mx-auto relative flex flex-col animate-in fade-in zoom-in duration-200">
-            <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-700">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-50">
+        <>
+          {/* Backdrop — tablet+ only */}
+          <div className="hidden sm:block fixed inset-0 z-50 bg-black/50 dark:bg-black/70 backdrop-blur-sm" />
+
+          {/* Panel */}
+          <div className="
+            fixed inset-0 z-50 flex flex-col
+            bg-white dark:bg-gray-800
+            sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2
+            sm:w-full sm:max-w-lg sm:max-h-[90vh] sm:rounded-2xl sm:shadow-xl
+            overflow-hidden
+          ">
+            {/* Modal header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex-shrink-0">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-50">
                 {selectedLead ? 'Edit Lead' : 'Add New Lead'}
               </h2>
-              <button 
+              <button
                 onClick={() => setIsModalOpen(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
-                aria-label="Close modal"
+                className="flex items-center justify-center w-11 h-11 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
+                aria-label="Close"
               >
-                <X size={24} />
+                <X size={22} />
               </button>
             </div>
-            
-            <div className="p-6">
-              <LeadForm 
-                initialData={selectedLead} 
-                onSubmit={handleFormSubmit} 
-                onCancel={() => setIsModalOpen(false)} 
+
+            {/* Modal body — scrollable */}
+            <div className="flex-1 overflow-y-auto p-5">
+              <LeadForm
+                initialData={selectedLead}
+                onSubmit={handleFormSubmit}
+                onCancel={() => setIsModalOpen(false)}
               />
             </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );

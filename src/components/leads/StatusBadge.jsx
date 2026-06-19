@@ -2,30 +2,25 @@ import React from 'react';
 
 /**
  * A reusable pill-shaped badge component that visually indicates the status of a lead.
- * Colors map semantically to the action stage.
- * 
- * @param {Object} props
- * @param {string} props.status - The current status of the lead
- * @returns {JSX.Element}
+ * Full dark mode support via Tailwind dark: variants.
  */
 export default function StatusBadge({ status }) {
-  // Determine the correct Tailwind classes based on the status string
   const getColorClasses = (status) => {
     switch (status) {
-      case 'New': 
-        return 'bg-gray-100 text-gray-700'; // Gray
-      case 'Contacted': 
-        return 'bg-amber-100 text-amber-700'; // Warning/Yellow
-      case 'Meeting Scheduled': 
-        return 'bg-blue-100 text-blue-700'; // Primary/Blue
-      case 'Proposal Sent': 
-        return 'bg-purple-100 text-purple-700'; // Purple
-      case 'Won': 
-        return 'bg-green-100 text-green-700'; // Success/Green
-      case 'Lost': 
-        return 'bg-red-100 text-red-700'; // Danger/Red
-      default: 
-        return 'bg-gray-100 text-gray-600'; // Fallback
+      case 'New':
+        return 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200';
+      case 'Contacted':
+        return 'bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300';
+      case 'Meeting Scheduled':
+        return 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300';
+      case 'Proposal Sent':
+        return 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300';
+      case 'Won':
+        return 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300';
+      case 'Lost':
+        return 'bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300';
+      default:
+        return 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300';
     }
   };
 
