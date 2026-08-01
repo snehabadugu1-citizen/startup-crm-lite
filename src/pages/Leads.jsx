@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, X, LayoutGrid, List } from 'lucide-react';
-import toast from 'react-hot-toast';
 import LeadTable from '../components/leads/LeadTable';
 import LeadCard from '../components/leads/LeadCard';
 import LeadForm from '../components/leads/LeadForm';
@@ -10,7 +9,14 @@ import EmptyState from '../components/common/EmptyState';
 import { useLeads } from '../context/LeadContext';
 
 export default function Leads() {
-  const { leads, addLead, updateLead, deleteLead } = useLeads();
+  const { leads, addLead, updateLead, deleteLead, fetchLeads, isLoading } = useLeads();
+
+  // Fetch leads from the API on initial mount.
+  // Subsequent mutations (add/update/delete) update the state in-place,
+  // so we don't need to refetch after every operation.
+  useEffect(() => {
+    fetchLeads();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [searchQuery,  setSearchQuery]  = useState('');
   const [activeFilter, setActiveFilter] = useState('All');
@@ -31,21 +37,28 @@ export default function Leads() {
   const handleClearFilters = () => { setSearchQuery(''); setActiveFilter('All'); };
   const handleAddClick     = () => { setSelectedLead(null); setIsModalOpen(true); };
   const handleEditClick    = (lead) => { setSelectedLead(lead); setIsModalOpen(true); };
-  const handleDeleteClick  = (id) => {
+  const handleDeleteClick  = async (id) => {
     if (window.confirm('Delete this lead? This cannot be undone.')) {
-      deleteLead(id);
-      toast.error('Lead deleted', { icon: '🗑️' });
+      try {
+        // deleteLead shows its own toast on success/failure via LeadContext
+        await deleteLead(id);
+      } catch {
+        // Error toast already shown by LeadContext — no duplicate needed
+      }
     }
   };
-  const handleFormSubmit = (formData) => {
-    if (selectedLead) {
-      updateLead(selectedLead.id, formData);
-      toast.success('Lead updated');
-    } else {
-      addLead(formData);
-      toast.success('Lead created');
+  const handleFormSubmit = async (formData) => {
+    try {
+      if (selectedLead) {
+        // Use _id (MongoDB) if available, fall back to id (legacy/local)
+        await updateLead(selectedLead._id || selectedLead.id, formData);
+      } else {
+        await addLead(formData);
+      }
+      setIsModalOpen(false); // close the modal only on success
+    } catch {
+      // Error toast already shown by LeadContext — modal stays open so user can fix
     }
-    setIsModalOpen(false);
   };
 
   return (
