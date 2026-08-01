@@ -64,14 +64,7 @@ const connectDB = async () => {
     // ── Attempt the connection ─────────────────────────────────────────────────
     // mongoose.connect() returns the Mongoose instance; .connection gives us the
     // raw driver connection object from which we extract the hostname for logging.
-    const conn = await mongoose.connect(process.env.MONGODB_URI, {
-      // Opt in to the new URL string parser (removes deprecation warning)
-      useNewUrlParser: true,
-
-      // Use the new Server Discovery and Monitoring engine (SDAM)
-      // Required for stable operation with MongoDB Atlas replica sets
-      useUnifiedTopology: true,
-    });
+    const conn = await mongoose.connect(process.env.MONGODB_URI);
 
     // ── Success — log the Atlas cluster host ───────────────────────────────────
     // We deliberately log only the HOST, not the full URI, to avoid leaking

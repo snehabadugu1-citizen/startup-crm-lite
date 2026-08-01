@@ -180,7 +180,7 @@ app.use(morgan(IS_PROD ? 'combined' : 'dev'));
  */
 const ALLOWED_ORIGINS = [
   process.env.FRONTEND_URL,           // Development origin from .env (e.g. http://localhost:5173)
-  'https://your-app.vercel.app',      // ← Replace with your real Vercel production URL
+  'https://startup-crm-lite-6w5drbi47-sneha9100.vercel.app',      // ← Replace with your real Vercel production URL
 ].filter(Boolean);                    // Remove undefined / empty entries
 
 app.use(
