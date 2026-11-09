@@ -180,8 +180,9 @@ export const paginatedResponse = (res, data, total, page, limit) => {
   return res.status(200).json({
     success: true,
 
-    // The current page of results
+    // The current page of results (provided as data and leads for client compatibility)
     data,
+    leads: data,
 
     // ── Pagination metadata ──────────────────────────────────────────────────
     pagination: {

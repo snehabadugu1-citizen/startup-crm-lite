@@ -28,9 +28,10 @@ import path from 'path';
 
 // Derive __dirname equivalent for ES modules
 const __filename = fileURLToPath(import.meta.url);
-const __dirname  = path.dirname(__filename);
+const __dirname = path.dirname(__filename);
 
-// Resolve path: backend/config/ → backend/ → project root → .env
+// Resolve path: load backend/.env first, then project root .env
+config({ path: path.resolve(__dirname, '../.env') });
 config({ path: path.resolve(__dirname, '../../.env') });
 
 // ── Mongoose ORM ───────────────────────────────────────────────────────────────

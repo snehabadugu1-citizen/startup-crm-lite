@@ -19,7 +19,7 @@ export const TOKEN_KEY = 'crm-token';
  */
 export async function register(name, email, password) {
   const response = await api.post('/api/auth/register', { name, email, password });
-  return response.data; // { token, user }
+  return response.data?.data || response.data; // { token, user }
 }
 
 /**
@@ -31,7 +31,7 @@ export async function register(name, email, password) {
  */
 export async function login(email, password) {
   const response = await api.post('/api/auth/login', { email, password });
-  return response.data; // { token, user }
+  return response.data?.data || response.data; // { token, user }
 }
 
 /**
@@ -53,7 +53,7 @@ export function logout() {
  */
 export async function getProfile() {
   const response = await api.get('/api/auth/profile');
-  return response.data; // { user: { name, email, ... } }
+  return response.data?.data || response.data; // { user: { name, email, ... } }
 }
 
 /**
@@ -63,6 +63,6 @@ export async function getProfile() {
  * @returns {Promise<object>} Updated user object from the server
  */
 export async function updateProfile(data) {
-  const response = await api.put('/api/auth/profile', data);
-  return response.data;
+  const response = await api.patch('/api/auth/profile', data);
+  return response.data?.data || response.data;
 }

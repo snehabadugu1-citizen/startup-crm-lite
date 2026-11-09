@@ -1,4 +1,4 @@
-﻿import mongoose from 'mongoose';
+import mongoose from 'mongoose';
 import Lead from '../models/Lead.js';
 import { successResponse, errorResponse, paginatedResponse } from '../utils/apiResponse.js';
 
@@ -277,7 +277,7 @@ export const updateLead = async (req, res, next) => {
     const updated = await Lead.findByIdAndUpdate(
       req.params.id,
       updates,
-      { new: true, runValidators: true }
+      { returnDocument: 'after', new: true, runValidators: true }
     ).populate('owner', 'name email');
 
     return successResponse(res, updated, 'Lead updated successfully');

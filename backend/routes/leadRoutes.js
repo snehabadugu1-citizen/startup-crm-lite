@@ -25,16 +25,16 @@ router.use(protect);
  * IMPORTANT: This route must be declared BEFORE /:id to prevent Express from
  *            interpreting "stats" as an ObjectId parameter.
  */
-router.get('/stats', getLeadStats);
+router.get(['/stats', '/stats/summary'], getLeadStats);
 
 /**
- * @route   GET /api/leads/monthly-stats
+ * @route   GET /api/leads/monthly-stats or /api/leads/stats/monthly
  * @desc    Per-month stats for the last 6 months (zero-filled, oldest first)
  * @access  Private
  *
  * Declared before /:id to prevent Express treating "monthly-stats" as an id.
  */
-router.get('/monthly-stats', getMonthlyStats);
+router.get(['/monthly-stats', '/stats/monthly'], getMonthlyStats);
 
 /**
  * @route   GET /api/leads/search?q=ali&limit=5
@@ -55,14 +55,23 @@ router.route('/')
   .post(createLead);
 
 /**
- * @route   GET    /api/leads/:id  → fetch a single lead
- * @route   PATCH  /api/leads/:id  → partial update
- * @route   DELETE /api/leads/:id  → permanent delete (owner or admin only)
+ * @route   PATCH|PUT /api/leads/:id/status → update status only
+ * @access  Private
+ */
+router.route('/:id/status')
+  .patch(updateLead)
+  .put(updateLead);
+
+/**
+ * @route   GET       /api/leads/:id  → fetch a single lead
+ * @route   PATCH|PUT /api/leads/:id  → partial or full update
+ * @route   DELETE    /api/leads/:id  → permanent delete (owner or admin only)
  * @access  Private
  */
 router.route('/:id')
   .get(getLeadById)
   .patch(updateLead)
+  .put(updateLead)
   .delete(deleteLead);
 
 export default router;

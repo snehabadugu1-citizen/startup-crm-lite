@@ -126,11 +126,14 @@ router.post('/login', loginValidation, validate, login);
 router.get('/profile', protect, getProfile);
 
 /**
- * @route   PATCH /api/auth/profile
+ * @route   PATCH|PUT /api/auth/profile
  * @desc    Update name or password for the authenticated user
  * @access  Private — requires Bearer token
  * @body    { name?, currentPassword?, newPassword? }
  */
-router.patch('/profile', protect, updateProfileValidation, validate, updateProfile);
+router.route('/profile')
+  .get(protect, getProfile)
+  .patch(protect, updateProfileValidation, validate, updateProfile)
+  .put(protect, updateProfileValidation, validate, updateProfile);
 
 export default router;

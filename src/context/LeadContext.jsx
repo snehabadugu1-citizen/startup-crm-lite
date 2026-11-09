@@ -70,7 +70,7 @@ export function LeadProvider({ children }) {
       if (Array.isArray(data)) {
         setLeads(data);
       } else {
-        setLeads(data.leads ?? []);
+        setLeads(data.leads ?? data.data ?? []);
         setPagination(data.pagination ?? null);
       }
     } catch (error) {
@@ -93,7 +93,7 @@ export function LeadProvider({ children }) {
     try {
       const result = await leadService.createLead(data);
       // Server may return { lead: {...} } or the lead object directly
-      const newLead = result.lead ?? result;
+      const newLead = result.lead ?? result.data ?? result;
       setLeads((prev) => [newLead, ...prev]);
       toast.success('Lead created successfully! 🎉');
     } catch (error) {
@@ -118,7 +118,7 @@ export function LeadProvider({ children }) {
     setIsLoading(true);
     try {
       const result = await leadService.updateLead(id, data);
-      const updated = result.lead ?? result;
+      const updated = result.lead ?? result.data ?? result;
 
       setLeads((prev) =>
         prev.map((lead) =>

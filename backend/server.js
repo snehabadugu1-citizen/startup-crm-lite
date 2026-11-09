@@ -42,8 +42,9 @@ import path                   from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
 
-// Resolve: backend/ → project root → .env
-loadEnv();
+// Resolve: load backend/.env first, then root ../.env
+loadEnv({ path: path.resolve(__dirname, '.env') });
+loadEnv({ path: path.resolve(__dirname, '../.env') });
 
 // =============================================================================
 // 1.  Core Node / third-party dependencies
@@ -180,6 +181,10 @@ app.use(morgan(IS_PROD ? 'combined' : 'dev'));
  */
 const ALLOWED_ORIGINS = [
   process.env.FRONTEND_URL,           // Development origin from .env (e.g. http://localhost:5173)
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
   'https://startup-crm-lite-6w5drbi47-sneha9100.vercel.app',      // ← Replace with your real Vercel production URL
 ].filter(Boolean);                    // Remove undefined / empty entries
 
@@ -188,19 +193,24 @@ app.use(
     /**
      * @param {string|undefined} origin - Value of the incoming request's Origin header.
      *        undefined means a non-browser client (Postman, curl, server-to-server call).
-     * @param {Function} callback - Call callback(null, true) to allow; callback(err) to deny.
+     * @param {Function} callback - Call callback(null, true) to allow; callback(null, false) to deny.
      */
     origin: (origin, callback) => {
       // Allow requests with no Origin header (mobile apps, server-to-server, Postman)
       if (!origin) return callback(null, true);
 
-      // Allow listed origins
-      if (ALLOWED_ORIGINS.includes(origin)) {
+      // Allow listed origins or any localhost/127.0.0.1 in development
+      if (ALLOWED_ORIGINS.includes(origin) || (!IS_PROD && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin))) {
         return callback(null, true);
       }
 
-      // Deny unknown origins — this surfaces as a CORS error in the browser console
-      return callback(new Error(`CORS: origin '${origin}' is not allowed`));
+      // In development allow origin to ease local workflow
+      if (!IS_PROD) {
+        return callback(null, true);
+      }
+
+      // Deny unknown origins cleanly
+      return callback(null, false);
     },
 
     // Required for cookies / Authorization headers to be forwarded
@@ -219,11 +229,11 @@ app.use(
  *              application-layer DDoS.
  *
  * Window : 15 minutes
- * Max    : 100 requests per IP per window
+ * Max    : 100 requests per IP per window (1000 in dev)
  */
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15-minute sliding window
-  max: 100,                  // Max 100 requests per IP per window
+  max: IS_PROD ? 100 : 1000, // Max requests per IP per window
   standardHeaders: true,     // Return RateLimit-* headers (RFC 6585)
   legacyHeaders: false,      // Disable deprecated X-RateLimit-* headers
   message: {
@@ -239,13 +249,13 @@ const generalLimiter = rateLimit({
  *              stuffing against /api/auth/login and /api/auth/register.
  *
  * Window : 15 minutes
- * Max    : 10 requests per IP per window
+ * Max    : 10 requests per IP per window (500 in dev)
  *
  * Auth requests count against BOTH limiters — authLimiter trips first.
  */
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10,
+  max: IS_PROD ? 10 : 500,
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -298,7 +308,12 @@ app.use(express.urlencoded({ extended: true }));
  * replaceWith: '_' swaps illegal characters rather than silently dropping them,
  * making injection attempts easier to detect and debug in logs.
  */
-app.use(mongoSanitize({ replaceWith: '_' }));
+app.use((req, _res, next) => {
+  if (req.body) mongoSanitize.sanitize(req.body, { replaceWith: '_' });
+  if (req.params) mongoSanitize.sanitize(req.params, { replaceWith: '_' });
+  if (req.query) mongoSanitize.sanitize(req.query, { replaceWith: '_' });
+  next();
+});
 
 // =============================================================================
 // 12. Health check — GET /api/health

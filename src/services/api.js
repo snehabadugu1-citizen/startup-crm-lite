@@ -12,8 +12,11 @@ import toast from 'react-hot-toast';
 // baseURL is injected at build-time from the .env file via Vite's import.meta.env.
 // In development this resolves to http://localhost:5000.
 // In production, set VITE_API_URL to your deployed backend URL.
+const rawBaseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const baseURL = rawBaseURL.endsWith('/') ? rawBaseURL.slice(0, -1) : rawBaseURL;
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL,
   headers: {
     'Content-Type': 'application/json',
   },

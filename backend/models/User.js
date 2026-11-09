@@ -109,17 +109,12 @@ const userSchema = new Schema(
  *
  * @param {Function} next - Call to pass control to the next middleware in the chain.
  */
-userSchema.pre('save', async function hashPassword(next) {
+userSchema.pre('save', async function hashPassword() {
   // Skip hashing if the password field hasn't changed (e.g. updating email only)
-  if (!this.isModified('password')) return next();
+  if (!this.isModified('password')) return;
 
-  try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    return next();
-  } catch (err) {
-    return next(err);
-  }
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
 });
 
 // ─── Instance Methods ────────────────────────────────────────────────────────

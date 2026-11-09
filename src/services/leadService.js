@@ -19,7 +19,11 @@ import api from './api';
 export async function getLeads(params = {}) {
   // Axios serialises the params object as ?status=X&search=Y&page=Z automatically
   const response = await api.get('/api/leads', { params });
-  return response.data;
+  const body = response.data;
+  return {
+    leads: Array.isArray(body) ? body : (body?.data || body?.leads || []),
+    pagination: body?.pagination || null,
+  };
 }
 
 /**
@@ -30,7 +34,7 @@ export async function getLeads(params = {}) {
  */
 export async function createLead(leadData) {
   const response = await api.post('/api/leads', leadData);
-  return response.data;
+  return response.data?.data || response.data?.lead || response.data;
 }
 
 /**
@@ -41,8 +45,8 @@ export async function createLead(leadData) {
  * @returns {Promise<{ lead: object }>} Updated lead
  */
 export async function updateLead(id, leadData) {
-  const response = await api.put(`/api/leads/${id}`, leadData);
-  return response.data;
+  const response = await api.patch(`/api/leads/${id}`, leadData);
+  return response.data?.data || response.data?.lead || response.data;
 }
 
 /**
@@ -54,7 +58,7 @@ export async function updateLead(id, leadData) {
  */
 export async function updateLeadStatus(id, status) {
   const response = await api.patch(`/api/leads/${id}/status`, { status });
-  return response.data;
+  return response.data?.data || response.data?.lead || response.data;
 }
 
 /**
@@ -75,8 +79,8 @@ export async function deleteLead(id) {
  * @returns {Promise<object>} Stats summary object
  */
 export async function getLeadStats() {
-  const response = await api.get('/api/leads/stats/summary');
-  return response.data;
+  const response = await api.get('/api/leads/stats');
+  return response.data?.data || response.data;
 }
 
 /**
@@ -85,6 +89,6 @@ export async function getLeadStats() {
  * @returns {Promise<object[]>} Array of { month, count } objects
  */
 export async function getMonthlyStats() {
-  const response = await api.get('/api/leads/stats/monthly');
-  return response.data;
+  const response = await api.get('/api/leads/monthly-stats');
+  return response.data?.data || response.data;
 }
