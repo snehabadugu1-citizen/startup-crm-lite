@@ -219,3 +219,26 @@ export const updateProfile = async (req, res, next) => {
     return next(err);
   }
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// @route   POST /api/auth/logout
+// @access  Public
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * @controller logout
+ * @description Concludes the user session.
+ *              Clears authentication cookies if set and returns a standard success message.
+ *
+ * @param {import('express').Request}  _req
+ * @param {import('express').Response} res
+ */
+export const logout = (_req, res) => {
+  res.clearCookie('token');
+  res.clearCookie('crm-token');
+
+  return res.status(200).json({
+    success: true,
+    message: 'Logged out successfully',
+  });
+};

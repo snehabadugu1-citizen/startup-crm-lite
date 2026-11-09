@@ -37,6 +37,7 @@
 import { config as loadEnv } from 'dotenv';
 import { fileURLToPath }     from 'url';
 import path                   from 'path';
+import dns                    from 'dns';
 
 // Derive __dirname equivalent for ES modules (not available natively)
 const __filename = fileURLToPath(import.meta.url);
@@ -45,6 +46,17 @@ const __dirname  = path.dirname(__filename);
 // Resolve: load backend/.env first, then root ../.env
 loadEnv({ path: path.resolve(__dirname, '.env') });
 loadEnv({ path: path.resolve(__dirname, '../.env') });
+
+// Configure Node.js c-ares DNS resolver: on Windows, if only loopback (127.0.0.1)
+// is registered, Node gets querySrv ECONNREFUSED for mongodb+srv:// URIs.
+try {
+  const currentServers = dns.getServers();
+  if (!currentServers || currentServers.length === 0 || currentServers.every(s => s.startsWith('127.'))) {
+    dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
+  }
+} catch {
+  // Gracefully continue
+}
 
 // =============================================================================
 // 1.  Core Node / third-party dependencies
